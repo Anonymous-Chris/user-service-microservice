@@ -10,12 +10,14 @@ import lombok.Builder;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.reactive.function.client.WebClient;
 
 @Service
 @AllArgsConstructor
 public class UserServiceImpl implements UserService{
     private UserRepository userRepository;
-    private RestTemplate restTemplate;
+//    private RestTemplate restTemplate;
+    private WebClient webClient;
     @Override
     public User saveUser(User user) {
         return userRepository.save(user);
@@ -32,11 +34,16 @@ public class UserServiceImpl implements UserService{
                 .email(user.getEmail())
                 .build();
 
-        ResponseEntity<DepartmentDto> responseEntity = restTemplate.getForEntity("http://localhost:8000/api/departments/" + user.getDepartmentId(),
-                DepartmentDto.class);
+//        ResponseEntity<DepartmentDto> responseEntity = restTemplate.getForEntity("http://localhost:8000/api/departments/" + user.getDepartmentId(),
+//                DepartmentDto.class);
+//use webclient bean to make api calls instead of restTemplate
 
-        DepartmentDto departmentDto = responseEntity.getBody();
-        System.out.println(responseEntity.getStatusCode());
+        DepartmentDto departmentDto = webClient.get()
+                .uri("http://localhost:8000/api/departments/" + user.getDepartmentId())
+                .retrieve()
+                .bodyToMono(DepartmentDto.class)
+                .block();
+
         ResponseDto responseDto = ResponseDto.builder()
                 .user(userDto)
                 .department(departmentDto)
