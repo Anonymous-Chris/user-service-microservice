@@ -1,5 +1,6 @@
 package com.chris.microservices.userservice.service;
 
+import com.chris.microservices.userservice.api.APIClient;
 import com.chris.microservices.userservice.dto.DepartmentDto;
 import com.chris.microservices.userservice.dto.ResponseDto;
 import com.chris.microservices.userservice.dto.UserDto;
@@ -17,7 +18,8 @@ import org.springframework.web.reactive.function.client.WebClient;
 public class UserServiceImpl implements UserService{
     private UserRepository userRepository;
 //    private RestTemplate restTemplate;
-    private WebClient webClient;
+//    private WebClient webClient;
+    private APIClient apiClient;
     @Override
     public User saveUser(User user) {
         return userRepository.save(user);
@@ -38,12 +40,14 @@ public class UserServiceImpl implements UserService{
 //                DepartmentDto.class);
 //use webclient bean to make api calls instead of restTemplate
 
-        DepartmentDto departmentDto = webClient.get()
-                .uri("http://localhost:8000/api/departments/" + user.getDepartmentId())
-                .retrieve()
-                .bodyToMono(DepartmentDto.class)
-                .block();
+//        DepartmentDto departmentDto = webClient.get()
+//                .uri("http://localhost:8000/api/departments/" + user.getDepartmentId())
+//                .retrieve()
+//                .bodyToMono(DepartmentDto.class)
+//                .block();
 
+        //use openfeign for rest api calls
+DepartmentDto departmentDto = apiClient.getDepartmentById(Long.valueOf(user.getDepartmentId()));
         ResponseDto responseDto = ResponseDto.builder()
                 .user(userDto)
                 .department(departmentDto)
